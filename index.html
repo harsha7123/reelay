@@ -196,7 +196,7 @@
       <div class="logo-lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9.5 5 2.5-5 2.5z" fill="#fff" stroke="none"/></svg></div>
       <h2>Sign in to join</h2>
       <p class="as">Enter your email and we'll send you a one-tap login link. Click it to continue — no password needed.</p>
-      <input class="input" type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email" style="margin-bottom:12px">
+      <input class="input" type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email" style="display:block;width:100%;box-sizing:border-box;padding:16px 18px;margin:0 0 14px;border:1px solid var(--hair);border-radius:14px;background:rgba(255,255,255,.85);font-family:inherit;font-size:16px;text-align:center;color:var(--ink)">
       <button class="btn btn-grad" style="width:100%" id="magicBtn" onclick="sendMagicLink()">Email me a login link</button>
       <div id="magicSent" style="display:none;color:var(--accent);font-size:13.5px;margin-top:14px;font-weight:600;line-height:1.5">✓ Check your inbox — click the link to come back and finish joining.</div>
       <div class="auth-legal">By continuing you agree to Reelay's Terms &amp; Privacy Policy.</div>
@@ -324,15 +324,23 @@ async function refreshAuthUI(){
 }
 async function signOut(){ if(sb){await sb.auth.signOut();} currentUser=null; refreshAuthUI(); go('s-landing'); showToast('Signed out'); }
 
-/* after returning from Google, land on the price question */
-(async function(){
-  await refreshAuthUI();
-  if(currentUser && new URLSearchParams(location.hash.replace('#','?')).get('access_token') || (location.hash.includes('access_token'))){
-    // came back from oauth
+/* after returning from the magic link, detect the session and go to the question */
+async function bootAuth(){
+  if(!sb){ return; }
+  // give supabase-js a moment to parse the #access_token from the URL
+  const cameFromLink = location.hash.includes('access_token') || location.hash.includes('error');
+  if(cameFromLink){ await new Promise(r=>setTimeout(r,400)); }
+  const {data:{session}}=await sb.auth.getSession();
+  currentUser = session?.user || null;
+  refreshAuthUI();
+  if(currentUser){
+    go('s-question'); fillWho();
+    // clean the #access_token junk out of the address bar
+    if(location.hash){ history.replaceState(null,'',location.pathname+location.search); }
   }
-  if(currentUser){ go('s-question'); fillWho(); }
-})();
-if(sb){ sb.auth.onAuthStateChange((_e,session)=>{ currentUser=session?.user||null; refreshAuthUI(); if(currentUser && document.getElementById('s-login').classList.contains('active')){ go('s-question'); fillWho(); } }); }
+}
+bootAuth();
+if(sb){ sb.auth.onAuthStateChange((_e,session)=>{ currentUser=session?.user||null; refreshAuthUI(); if(currentUser && (document.getElementById('s-login').classList.contains('active')||document.getElementById('s-landing').classList.contains('active'))){ go('s-question'); fillWho(); if(location.hash){ history.replaceState(null,'',location.pathname+location.search); } } }); }
 
 /* price tiers */
 document.querySelectorAll('.tier').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tier').forEach(x=>x.classList.remove('sel'));t.classList.add('sel');chosenPrice=+t.dataset.p;}));
