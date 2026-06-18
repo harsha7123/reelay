@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reelay — one long video, a week of shorts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --base:#eaf2ff;--ink:#0f1b2d;--muted:#5a6b85;--accent:#2f80ed;--accent-dark:#1f63c4;
+    --glass:rgba(255,255,255,0.58);--stroke:rgba(255,255,255,0.85);--hair:rgba(15,27,45,0.08);
+    --shadow:0 18px 50px -18px rgba(47,128,237,.28);--radius:26px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:var(--base);-webkit-font-smoothing:antialiased;position:relative;min-height:100vh;overflow-x:hidden}
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.65;animation:float 24s ease-in-out infinite}
+  .o1{width:42vw;height:42vw;background:#b9d4ff;top:-8vh;left:-6vw}
+  .o2{width:38vw;height:38vw;background:#bfe9ff;top:18vh;right:-10vw;animation-delay:-7s}
+  .o3{width:36vw;height:36vw;background:#cfe0ff;bottom:-12vh;left:14vw;animation-delay:-13s}
+  .o4{width:30vw;height:30vw;background:#c4f3ff;bottom:6vh;right:6vw;animation-delay:-4s;opacity:.55}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(3vw,4vh) scale(1.06)}66%{transform:translate(-2vw,-3vh) scale(.96)}}
+  .wrap{position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:22px 22px 70px}
+  .glass{background:var(--glass);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow),inset 0 1px 1px rgba(255,255,255,.9);position:relative}
+  .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 42%);pointer-events:none}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;margin-bottom:40px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:20px;letter-spacing:-.02em;cursor:pointer}
+  .logo{width:36px;height:36px;border-radius:11px;background:var(--accent);display:grid;place-items:center;box-shadow:0 8px 20px -6px rgba(47,128,237,.7)}
+  .logo svg{width:20px;height:20px}
+  .nav-right{display:flex;align-items:center;gap:14px}
+  .count-pill{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.6);border:1px solid var(--stroke);backdrop-filter:blur(10px)}
+  .count-pill .live{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+  .link-btn{font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);background:none;border:none;cursor:pointer;padding:8px 6px}
+  .link-btn:hover{color:var(--accent)}
+  .screen{display:none}
+  .screen.active{display:block;animation:rise .5s cubic-bezier(.2,.8,.2,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center;margin-bottom:30px}
+  @media(max-width:860px){.hero{grid-template-columns:1fr;gap:34px}}
+  .badge{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.65);border:1px solid var(--stroke);backdrop-filter:blur(10px);margin-bottom:22px;color:var(--accent)}
+  h1{font-size:clamp(40px,6vw,66px);line-height:1.02;font-weight:800;letter-spacing:-.035em;margin-bottom:20px}
+  h1 em{font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--accent)}
+  .lede{font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:520px;line-height:1.6;margin-bottom:26px}
+  .lede b{color:var(--ink);font-weight:700}
+  .btn{font-family:inherit;cursor:pointer;border:none;font-weight:700;border-radius:14px;transition:transform .15s,box-shadow .2s,background .2s;font-size:15px}
+  .btn:active{transform:translateY(1px) scale(.99)}
+  .btn-grad{background:var(--accent);color:#fff;padding:16px 28px;box-shadow:0 16px 36px -12px rgba(47,128,237,.7)}
+  .btn-grad:hover{background:var(--accent-dark);box-shadow:0 22px 48px -12px rgba(47,128,237,.85);transform:translateY(-1px)}
+  .btn-glass{background:rgba(255,255,255,.65);border:1px solid var(--stroke);color:var(--ink);padding:16px 24px;backdrop-filter:blur(10px)}
+  .btn-glass:hover{background:rgba(255,255,255,.9)}
+  .hero-cta{display:flex;gap:13px;flex-wrap:wrap;align-items:center}
+  .trust{font-size:13px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:7px}
+  .avatars{display:flex}.avatars span{width:24px;height:24px;border-radius:50%;border:2px solid #fff;margin-left:-7px;background:var(--accent)}.avatars span:first-child{margin-left:0}
+  .demo-phone{width:248px;height:506px;margin:0 auto;border-radius:40px;padding:11px;background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(255,255,255,.55));border:1px solid var(--stroke);box-shadow:0 40px 90px -30px rgba(47,128,237,.5),inset 0 1px 2px rgba(255,255,255,1);position:relative}
+  .demo-screen{width:100%;height:100%;border-radius:30px;overflow:hidden;position:relative;background:#0c1422}
+  .demo-screen video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ds-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.85));pointer-events:none}
+  .ds-badge{position:absolute;top:14px;left:14px;font-size:10.5px;font-weight:600;color:#fff;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);padding:5px 10px;border-radius:8px;backdrop-filter:blur(6px)}
+  .ds-cap{position:absolute;left:18px;right:18px;bottom:54px;text-align:center;color:#fff;font-weight:800;font-size:19px;line-height:1.32;text-shadow:0 2px 14px rgba(0,0,0,.85);transition:opacity .4s}
+  .ds-cap .hl{color:#ffd24b}
+  .ds-dots{position:absolute;bottom:22px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+  .ds-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);transition:.3s}.ds-dots i.on{background:#fff;width:18px;border-radius:3px}
+  .proof-card{padding:22px 28px;margin:8px 0 46px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;text-align:center}
+  .proof-card .pc-num{font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--accent)}
+  .proof-card .pc-txt{font-size:15px;color:var(--muted)}.proof-card .pc-txt b{color:var(--ink);font-weight:700}
+  .waitlist{padding:38px 36px;max-width:600px;margin:0 auto 50px}
+  .waitlist h2{font-size:27px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;text-align:center}
+  .waitlist .ws{text-align:center;color:var(--muted);font-size:14.5px;line-height:1.55;margin-bottom:24px}
+  .who{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:22px;font-size:14px;color:var(--muted)}
+  .who .av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+  .who b{color:var(--ink)}
+  .q-label{font-size:13.5px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .q-label small{font-weight:500;color:var(--muted)}
+  .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:520px){.tiers{grid-template-columns:1fr 1fr}}
+  .tier{padding:18px 8px;border-radius:16px;border:1px solid var(--hair);background:rgba(255,255,255,.62);cursor:pointer;text-align:center;transition:.18s}
+  .tier:hover{background:#fff;transform:translateY(-2px)}
+  .tier.sel{border-color:transparent;background:#fff;box-shadow:0 0 0 2px var(--accent),0 12px 26px -10px rgba(47,128,237,.5)}
+  .tier .amt{font-size:23px;font-weight:800;letter-spacing:-.02em}.tier .per{font-size:11px;color:var(--muted);margin-top:2px}.tier.sel .amt{color:var(--accent)}
+  .submit-row{margin-top:28px}
+  .btn-grad.full{width:100%;display:flex;align-items:center;justify-content:center;gap:10px}
+  .micro{text-align:center;font-size:12.5px;color:var(--muted);margin-top:14px}
+  .err{color:#e0356b;font-size:13px;margin-top:8px;text-align:center;display:none}
+  .section-h{text-align:center;margin:64px 0 26px}
+  .section-h .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .section-h h2{font-size:30px;font-weight:800;letter-spacing:-.025em}
+  .section-h p{color:var(--muted);font-size:15px;margin-top:8px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.55}
+  .clip-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media(max-width:860px){.clip-strip{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.clip-strip{grid-template-columns:1fr 1fr}}
+  .clip{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:9/16;border:1px solid var(--stroke);box-shadow:var(--shadow);cursor:pointer;transition:.2s;background:linear-gradient(200deg,#1d3357,#0a1422)}
+  .clip:hover{transform:translateY(-5px) scale(1.02)}
+  .clip video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .clip .cscrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.7));pointer-events:none}
+  .clip .cscore{position:absolute;top:9px;left:9px;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.45);padding:4px 8px;border-radius:7px;backdrop-filter:blur(6px)}
+  .clip .cdur{position:absolute;top:9px;right:9px;font-size:10px;font-weight:600;color:#fff;background:rgba(0,0,0,.45);padding:4px 8px;border-radius:7px}
+  .clip .cplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);display:grid;place-items:center;border:1px solid rgba(255,255,255,.35);color:#fff;font-size:13px;transition:.2s}
+  .clip:hover .cplay{opacity:0}
+  .clip .ccap{position:absolute;left:11px;right:11px;bottom:12px;color:#fff;font-weight:800;font-size:12.5px;line-height:1.3;text-shadow:0 2px 8px rgba(0,0,0,.9)}.clip .ccap .hl{color:#ffd24b}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
+  @media(max-width:780px){.steps{grid-template-columns:1fr 1fr}}
+  .step{padding:24px 20px}
+  .step .si{width:42px;height:42px;border-radius:12px;background:rgba(47,128,237,.12);display:grid;place-items:center;margin-bottom:14px;font-size:20px}
+  .step h3{font-size:16px;font-weight:700;margin-bottom:6px}.step p{font-size:13.5px;color:var(--muted);line-height:1.5}
+  .auth-page{min-height:78vh;display:grid;place-items:center}
+  .auth-card{width:100%;max-width:420px;padding:42px 38px;text-align:center}
+  .auth-card .logo-lg{width:54px;height:54px;border-radius:16px;background:var(--accent);display:grid;place-items:center;margin:0 auto 22px;box-shadow:0 14px 28px -8px rgba(47,128,237,.7)}
+  .auth-card .logo-lg svg{width:28px;height:28px}
+  .auth-card h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+  .auth-card .as{color:var(--muted);font-size:14.5px;margin-bottom:30px;line-height:1.5}
+  .google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;color:#1f1f1f;padding:15px;border-radius:14px;font-weight:700;font-size:15px;border:1px solid var(--hair);cursor:pointer;transition:.18s;box-shadow:0 6px 18px -8px rgba(0,0,0,.2)}
+  .google-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(0,0,0,.3)}
+  .google-btn svg{width:20px;height:20px}
+  .auth-back{margin-top:26px;font-size:13.5px;color:var(--muted)}
+  .auth-back a{color:var(--accent);text-decoration:none;font-weight:600;cursor:pointer}
+  .auth-legal{font-size:11.5px;color:var(--muted);margin-top:20px;line-height:1.5}
+  .confirm{max-width:560px;margin:30px auto 0;padding:44px 38px;text-align:center}
+  .confirm .tick-big{width:74px;height:74px;border-radius:50%;background:var(--accent);display:grid;place-items:center;margin:0 auto 22px;box-shadow:0 16px 34px -10px rgba(47,128,237,.7);animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+  .confirm .tick-big svg{width:36px;height:36px}
+  .confirm h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+  .confirm .queue{font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:26px}.confirm .queue b{color:var(--ink)}
+  .pos-badge{display:inline-flex;flex-direction:column;align-items:center;padding:20px 34px;border-radius:20px;background:rgba(255,255,255,.62);border:1px solid var(--stroke);margin-bottom:22px}
+  .pos-badge .pn{font-size:36px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+  .pos-badge .pl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+  .share-btn{display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:13px;border:1px solid var(--hair);background:rgba(255,255,255,.72);cursor:pointer;font-weight:600;font-size:13.5px;transition:.16s}
+  .share-btn:hover{background:#fff;transform:translateY(-1px)}
+  .toast{position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:90;background:var(--accent);color:#fff;padding:14px 24px;border-radius:14px;font-weight:700;font-size:14px;opacity:0;transition:.35s cubic-bezier(.2,.8,.2,1);box-shadow:0 18px 40px -14px rgba(47,128,237,.7)}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:50px;line-height:1.7;opacity:.8}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div></div>
+<div class="wrap">
+  <div class="topbar glass">
+    <div class="brand" onclick="go('s-landing')"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9.5 5 2.5-5 2.5z" fill="#fff" stroke="none"/></svg></span>Reelay</div>
+    <div class="nav-right">
+      <div class="count-pill"><span class="live"></span><span id="navCount">0</span> joined</div>
+      <button class="link-btn" id="navAuth" onclick="go('s-login')">Sign in</button>
+      <button class="btn btn-grad" style="padding:11px 20px;font-size:14px" onclick="startJoin()">Join the waitlist</button>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <section class="screen active" id="s-landing">
+    <div class="hero">
+      <div>
+        <span class="badge">✦ Now in early access</span>
+        <h1>One long video.<br>A week of <em>shorts</em>, done for you.</h1>
+        <p class="lede">Drop a podcast, interview, or stream. Reelay finds the best moments, writes punchy captions, and hands you ready-to-post shorts. <b>You swipe to keep the ones that fit — it learns your taste.</b></p>
+        <div class="hero-cta">
+          <button class="btn btn-grad" onclick="startJoin()">Join the waitlist</button>
+          <button class="btn btn-glass" onclick="document.getElementById('demoSec').scrollIntoView({behavior:'smooth'})">See real shorts</button>
+        </div>
+        <div class="trust"><span class="avatars"><span></span><span></span><span></span></span> Creators from 40+ countries already in line</div>
+      </div>
+      <div>
+        <div class="demo-phone"><div class="demo-screen">
+          <video id="heroVid" muted loop playsinline preload="metadata"></video>
+          <div class="ds-scrim"></div><div class="ds-badge" id="dsBadge">🔥 94 · hook score</div>
+          <div class="ds-cap" id="dsCap"></div><div class="ds-dots" id="dsDots"></div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="proof-card glass">
+      <div class="pc-num" id="bigCount">0</div>
+      <div class="pc-txt"><b>creators</b> are on the waitlist. Reelay launches soon — join to get in first.</div>
+    </div>
+
+    <div id="demoSec">
+      <div class="section-h"><div class="eyebrow">Real output</div><h2>From one long video</h2><p>Five shorts, cut and captioned automatically. Hover any clip to play.</p></div>
+      <div class="clip-strip" id="clipStrip"></div>
+    </div>
+
+    <div class="section-h"><div class="eyebrow">How it works</div><h2>Four steps. Zero editing.</h2></div>
+    <div class="steps">
+      <div class="step glass"><div class="si">📤</div><h3>Upload once</h3><p>Drop your long video — podcast, interview, webinar, stream.</p></div>
+      <div class="step glass"><div class="si">✨</div><h3>AI finds the gold</h3><p>It transcribes, picks the strongest moments, and cuts vertical shorts with captions.</p></div>
+      <div class="step glass"><div class="si">👆</div><h3>Swipe to choose</h3><p>Keep what fits your channel, skip the rest. Reelay learns your taste each time.</p></div>
+      <div class="step glass"><div class="si">🚀</div><h3>Post anywhere</h3><p>Send your picks straight to Instagram, TikTok, or YouTube Shorts.</p></div>
+    </div>
+    <div style="text-align:center;margin-top:46px"><button class="btn btn-grad" onclick="startJoin()">Join the waitlist</button></div>
+    <div class="foot">Prototype · the live product processes your real videos in the cloud.<br>Reelay — one long video, a week of shorts.</div>
+  </section>
+
+  <!-- LOGIN (step 1 of join) -->
+  <section class="screen" id="s-login">
+    <div class="auth-page"><div class="auth-card glass">
+      <div class="logo-lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9.5 5 2.5-5 2.5z" fill="#fff" stroke="none"/></svg></div>
+      <h2>Sign in to join</h2>
+      <p class="as">First, sign in with Google. Then tell us what Reelay would be worth to you and you're on the list.</p>
+      <button class="google-btn" id="googleBtn" onclick="googleLogin()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1Z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84Z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38Z"/></svg>
+        Continue with Google
+      </button>
+      <div class="auth-legal">By continuing you agree to Reelay's Terms &amp; Privacy Policy.</div>
+      <div class="auth-back"><a onclick="go('s-landing')">← Back to home</a></div>
+    </div></div>
+  </section>
+
+  <!-- PRICE QUESTION (step 2, after login) -->
+  <section class="screen" id="s-question">
+    <div class="waitlist glass" style="margin-top:20px">
+      <h2>You're signed in 🎉</h2>
+      <div class="who" id="whoRow"><span class="av" id="whoAv">U</span> <span><b id="whoEmail">you@email.com</b></span></div>
+      <p class="ws">One quick question and you're on the list.</p>
+      <div class="q-label">If Reelay saves you hours of editing every week, what would you pay? <small>(pick one)</small></div>
+      <div class="tiers" id="tiers">
+        <div class="tier" data-p="9"><div class="amt">$9</div><div class="per">/month</div></div>
+        <div class="tier sel" data-p="19"><div class="amt">$19</div><div class="per">/month</div></div>
+        <div class="tier" data-p="29"><div class="amt">$29</div><div class="per">/month</div></div>
+        <div class="tier" data-p="49"><div class="amt">$49</div><div class="per">/month</div></div>
+      </div>
+      <div class="submit-row"><button class="btn btn-grad full" id="joinBtn" onclick="submitJoin()">Join the waitlist</button></div>
+      <div class="err" id="formErr">Something went wrong — please try again.</div>
+      <div class="micro">No spam. One email when we launch.</div>
+    </div>
+  </section>
+
+  <!-- CONFIRM -->
+  <section class="screen" id="s-confirm">
+    <div class="confirm glass">
+      <div class="tick-big"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h2>You're on the list 🎉</h2>
+      <p class="queue">Thanks for joining — a confirmation email is on its way, and we'll write again the moment Reelay launches.</p>
+      <div class="pos-badge"><div class="pn" id="queuePos">#1</div><div class="pl">your spot in line</div></div>
+      <div class="queue" id="priceEcho" style="margin-top:-6px"></div>
+      <p class="queue" style="margin-top:18px;margin-bottom:14px">Move up the list — invite a creator friend.</p>
+      <div class="share-row">
+        <button class="share-btn" onclick="copyShare()">🔗 Copy invite link</button>
+        <button class="share-btn" onclick="showToast('Shared to X')">𝕏 Share</button>
+        <button class="share-btn" onclick="showToast('Shared to WhatsApp')">💬 WhatsApp</button>
+      </div>
+      <div class="auth-back" style="margin-top:28px"><a onclick="go('s-landing')">← Back to home</a></div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* =======================================================================
+   CONFIG — paste your values (steps are in the chat)
+   ======================================================================= */
+const SUPABASE_URL = "https://bmfjhriwzvhrzydcqpop.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Iyz2_DG_Kut7M-dAV35RHg_ytGs4kAg"; // the public anon key
+
+/* Your 5 shorts in a "clips" folder next to index.html. Edit captions to match. */
+const CLIPS=[
+ {file:'clips/clip1.mp4', cap:'The one habit that <span class="hl">changed my mornings</span>', dur:'0:42', score:94},
+ {file:'clips/clip2.mp4', cap:'Why most startups <span class="hl">fail in year two</span>',     dur:'1:08', score:89},
+ {file:'clips/clip3.mp4', cap:'Stop chasing motivation — <span class="hl">do this</span>',        dur:'0:37', score:91},
+ {file:'clips/clip4.mp4', cap:'The 5-minute rule that <span class="hl">actually works</span>',     dur:'0:51', score:86},
+ {file:'clips/clip5.mp4', cap:'What nobody tells you <span class="hl">about success</span>',       dur:'1:02', score:90}
+];
+
+/* ---- init supabase (guarded so the page still renders if keys missing) ---- */
+let sb=null;
+try{ if(SUPABASE_URL && !SUPABASE_URL.startsWith('PASTE')){ sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } }catch(e){ console.warn('Supabase not ready',e); }
+
+let chosenPrice=19, currentUser=null;
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0});}
+
+/* clip strip */
+(function(){const strip=document.getElementById('clipStrip');CLIPS.forEach(c=>{const el=document.createElement('div');el.className='clip';
+  el.innerHTML=`<video src="${c.file}" muted loop playsinline preload="metadata"></video><div class="cscrim"></div><div class="cscore">🔥 ${c.score}</div><div class="cdur">${c.dur}</div><div class="cplay">▶</div><div class="ccap">${c.cap}</div>`;
+  const v=el.querySelector('video');el.addEventListener('mouseenter',()=>{v.currentTime=0;v.play().catch(()=>{});});el.addEventListener('mouseleave',()=>{v.pause();});strip.appendChild(el);});})();
+
+/* hero rotation */
+(function(){const v=document.getElementById('heroVid'),cap=document.getElementById('dsCap'),badge=document.getElementById('dsBadge'),dots=document.getElementById('dsDots');
+  CLIPS.forEach((_,i)=>{const d=document.createElement('i');if(i===0)d.className='on';dots.appendChild(d);});let i=0;
+  function paint(){v.src=CLIPS[i].file;v.play().catch(()=>{});cap.innerHTML=CLIPS[i].cap;badge.textContent=`🔥 ${CLIPS[i].score} · hook score`;[...dots.children].forEach((d,k)=>d.className=k===i?'on':'');}
+  paint();setInterval(()=>{cap.style.opacity=0;setTimeout(()=>{i=(i+1)%CLIPS.length;paint();cap.style.opacity=1;},380);},4200);})();
+
+/* ---- live count from 0 up to the REAL number of signups in Supabase ---- */
+function fmt(n){return n.toLocaleString();}
+function animateCount(target){
+  let n=0; const t=setInterval(()=>{ n+=Math.max(1,Math.ceil((target-n)/12)); if(n>=target){n=target;clearInterval(t);}
+    document.getElementById('navCount').textContent=fmt(n); document.getElementById('bigCount').textContent=fmt(n); },45);
+}
+async function loadCount(){
+  if(!sb){ animateCount(0); return; }
+  const {count,error}=await sb.from('waitlist').select('*',{count:'exact',head:true});
+  animateCount(error?0:(count||0));
+}
+loadCount();
+
+/* ---- auth ---- */
+async function startJoin(){
+  if(currentUser){ go('s-question'); fillWho(); }
+  else { go('s-login'); }
+}
+async function googleLogin(){
+  if(!sb){ showToast('Add your Supabase keys first'); return; }
+  const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href}});
+  if(error) showToast(error.message);
+}
+function fillWho(){
+  if(!currentUser) return;
+  const email=currentUser.email||'';
+  document.getElementById('whoEmail').textContent=email;
+  document.getElementById('whoAv').textContent=(email[0]||'U').toUpperCase();
+}
+async function refreshAuthUI(){
+  if(!sb) return;
+  const {data:{session}}=await sb.auth.getSession();
+  currentUser = session?.user || null;
+  const nav=document.getElementById('navAuth');
+  if(currentUser){ nav.textContent='Sign out'; nav.onclick=signOut; }
+  else { nav.textContent='Sign in'; nav.onclick=()=>go('s-login'); }
+}
+async function signOut(){ if(sb){await sb.auth.signOut();} currentUser=null; refreshAuthUI(); go('s-landing'); showToast('Signed out'); }
+
+/* after returning from Google, land on the price question */
+(async function(){
+  await refreshAuthUI();
+  if(currentUser && new URLSearchParams(location.hash.replace('#','?')).get('access_token') || (location.hash.includes('access_token'))){
+    // came back from oauth
+  }
+  if(currentUser){ go('s-question'); fillWho(); }
+})();
+if(sb){ sb.auth.onAuthStateChange((_e,session)=>{ currentUser=session?.user||null; refreshAuthUI(); if(currentUser && document.getElementById('s-login').classList.contains('active')){ go('s-question'); fillWho(); } }); }
+
+/* price tiers */
+document.querySelectorAll('.tier').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tier').forEach(x=>x.classList.remove('sel'));t.classList.add('sel');chosenPrice=+t.dataset.p;}));
+
+/* ---- submit: write to Supabase (which also triggers the email) ---- */
+async function submitJoin(){
+  const btn=document.getElementById('joinBtn'), err=document.getElementById('formErr');
+  err.style.display='none';
+  if(!sb || !currentUser){ showToast('Please sign in first'); go('s-login'); return; }
+  btn.textContent='Joining…';
+  const row={ email:currentUser.email, price:chosenPrice, ref:new URLSearchParams(location.search).get('ref')||'', user_id:currentUser.id };
+  const {error}=await sb.from('waitlist').upsert(row,{onConflict:'email'});
+  if(error){ err.textContent=error.message; err.style.display='block'; btn.textContent='Join the waitlist'; return; }
+
+  // recount + position
+  const {count}=await sb.from('waitlist').select('*',{count:'exact',head:true});
+  document.getElementById('queuePos').textContent='#'+fmt(count||1);
+  document.getElementById('priceEcho').innerHTML=`You told us you'd pay <b>$${chosenPrice}/mo</b> — thank you, that helps us price it fairly.`;
+  animateCount(count||1);
+  btn.textContent='Join the waitlist';
+  go('s-confirm');
+}
+
+function copyShare(){const link=location.origin+location.pathname+'?ref='+(currentUser?currentUser.id.slice(0,6):'you');navigator.clipboard?.writeText(link).then(()=>showToast('Invite link copied!'),()=>showToast('Invite link copied!'));}
+function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2300);}
+</script>
+</body>
+</html>
