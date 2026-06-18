@@ -317,7 +317,7 @@ function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remo
   paint();setInterval(()=>{cap.style.opacity=0;setTimeout(()=>{i=(i+1)%CLIPS.length;paint();cap.style.opacity=1;},380);},4200);})();
 
 /* ---- live count from 0 up to the REAL number of signups in Supabase ---- */
-function fmt(n){return n.toLocaleString();}
+function fmt(n){ n=Number(n); if(!isFinite(n)) n=0; return n.toLocaleString(); }
 function animateCount(target){
   let n=0; const t=setInterval(()=>{ n+=Math.max(1,Math.ceil((target-n)/12)); if(n>=target){n=target;clearInterval(t);}
     document.getElementById('navCount').textContent=fmt(n); document.getElementById('bigCount').textContent=fmt(n); },45);
@@ -341,8 +341,9 @@ async function sendMagicLink(){
   const btn=document.getElementById('magicBtn'); btn.textContent='Sending…';
   const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href}});
   btn.textContent='Email me a login link';
-  if(error){ showToast(error.message); return; }
+  if(error){ showToast(error.message||'Could not send link — try again'); return; }
   document.getElementById('magicSent').style.display='block';
+  showToast('Login link sent — check your inbox');
 }
 function fillWho(){
   if(!currentUser) return;
@@ -401,8 +402,7 @@ async function submitJoin(){
 }
 
 function copyShare(){const link=location.origin+location.pathname+'?ref='+(currentUser?currentUser.id.slice(0,6):'you');navigator.clipboard?.writeText(link).then(()=>showToast('Invite link copied!'),()=>showToast('Invite link copied!'));}
-function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2300);}
+function showToast(t){ if(t&&typeof t==='object'){ t=t.message||t.error_description||t.error||'Something went wrong'; } if(typeof t!=='string'){ t=String(t); } const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2300);}
 </script>
 </body>
-<script defer src="/_vercel/insights/script.js"></script>
 </html>
